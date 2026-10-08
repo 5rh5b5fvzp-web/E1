@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+    "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lab.student.mapper.StudentMapper">
+
+    <!-- 自定义结果映射：解决列名与属性名不一致（student_id -> studentId 等） -->
+    <resultMap id="studentMap" type="com.lab.student.entity.Student">
+        <id     property="studentId" column="student_id"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="name"      column="name"/>
+        <result property="gender"    column="gender"/>
+        <result property="major"     column="major"/>
+        <result property="stuClass"  column="stu_class"/>
+        <result property="age"       column="age"/>
+        <result property="score"     column="score"/>
+        <result property="enrollDate" column="enroll_date"/>
+        <result property="status"    column="status"/>
+    </resultMap>
+
+    <!-- 全字段 SQL 片段，供各处复用 -->
+    <sql id="allColumns">
+        student_id, student_no, name, gender, major, stu_class, age, score, enroll_date, status
+    </sql>
+
+    <!-- 查询全部 -->
+    <select id="findAll" resultMap="studentMap">
+        SELECT <include refid="allColumns"/> FROM student
+    </select>
+
+    <!-- 按主键查询 -->
+    <select id="findByPk" resultMap="studentMap">
+        SELECT <include refid="allColumns"/> FROM student WHERE student_id = #{studentId}
+    </select>
+
+    <!-- 新增并回填自增主键 -->
+    <insert id="addStudent" parameterType="com.lab.student.entity.Student"
+            useGeneratedKeys="true" keyProperty="studentId">
+        INSERT INTO student (student_no, name, gender, major, stu_class, age, score, enroll_date, status)
+        VALUES (#{studentNo}, #{name}, #{gender}, #{major}, #{stuClass}, #{age}, #{score}, #{enrollDate}, #{status})
+    </insert>
+
+    <!-- 按主键全字段更新 -->
+    <update id="modifyStudent" parameterType="com.lab.student.entity.Student">
+        UPDATE student
+        SET student_no = #{studentNo}, name = #{name}, gender = #{gender},
+            major = #{major}, stu_class = #{stuClass}, age = #{age},
+            score = #{score}, status = #{status}
+        WHERE student_id = #{studentId}
+    </update>
+
+    <!-- 按主键删除 -->
+    <delete id="removeByPk">
+        DELETE FROM student WHERE student_id = #{studentId}
+    </delete>
+
+</mapper>

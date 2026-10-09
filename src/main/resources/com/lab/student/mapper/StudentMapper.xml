@@ -55,4 +55,78 @@
         DELETE FROM student WHERE student_id = #{studentId}
     </delete>
 
+    <!-- 多条件动态模糊查询（if / where：自动剔除开头多余的 AND） -->
+    <select id="queryByCondition" parameterType="com.lab.student.entity.Student" resultMap="studentMap">
+        SELECT <include refid="allColumns"/> FROM student
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="gender != null and gender != ''">
+                AND gender = #{gender}
+            </if>
+            <if test="major != null and major != ''">
+                AND major = #{major}
+            </if>
+            <if test="stuClass != null and stuClass != ''">
+                AND stu_class = #{stuClass}
+            </if>
+            <if test="score != null">
+                AND score >= #{score}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <!-- 动态更新：仅更新传入的非空字段（set：自动剔除末尾多余的逗号） -->
+    <update id="modifyDynamic" parameterType="com.lab.student.entity.Student">
+        UPDATE student
+        <set>
+            <if test="studentNo != null">student_no = #{studentNo},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="major != null">major = #{major},</if>
+            <if test="stuClass != null">stu_class = #{stuClass},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="score != null">score = #{score},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE student_id = #{studentId}
+    </update>
+
+    <!-- 批量删除 -->
+    <delete id="removeBatch">
+        DELETE FROM student WHERE student_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 批量插入 -->
+    <insert id="addBatch">
+        INSERT INTO student (student_no, name, gender, major, stu_class, age, score, enroll_date, status) VALUES
+        <foreach collection="list" item="s" separator=",">
+            (#{s.studentNo}, #{s.name}, #{s.gender}, #{s.major}, #{s.stuClass},
+             #{s.age}, #{s.score}, #{s.enrollDate}, #{s.status})
+        </foreach>
+    </insert>
+
+    <!-- 分支选择：优先按姓名精确查，否则按专业查，否则查询全部（choose/when/otherwise） -->
+    <select id="queryByPriority" resultMap="studentMap">
+        SELECT <include refid="allColumns"/> FROM student
+        <choose>
+            <when test="name != null and name != ''">
+                WHERE name = #{name}
+            </when>
+            <when test="major != null and major != ''">
+                WHERE major = #{major}
+            </when>
+            <otherwise>
+                WHERE status = 1
+            </otherwise>
+        </choose>
+    </select>
+
 </mapper>

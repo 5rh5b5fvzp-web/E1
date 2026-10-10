@@ -1,19 +1,28 @@
 package com.lab.student.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * 学生实体类（业务载体：学生表 student）。
- * 任务 2 阶段：普通 POJO，配合手写 XML 映射；
- * 任务 4 阶段：再添加 MyBatis-Plus 注解（@TableName/@TableId/@TableField）。
+ * 学生实体类（业务载体：学生表 student）
+ * 同时被 MyBatis XML 映射与 MyBatis-Plus 通用 Mapper 使用：
+ * 手写 XML 时靠 resultMap 完成字段映射；
+ * MyBatis-Plus 时靠 @TableName/@TableId/@TableField 注解完成映射。
  */
+@TableName("student")
 public class Student {
 
     /** 学生主键ID（自增） */
+    @TableId(value = "student_id", type = IdType.AUTO)
     private Integer studentId;
 
     /** 学号 */
+    @TableField("student_no")
     private String studentNo;
 
     /** 姓名 */
@@ -26,6 +35,7 @@ public class Student {
     private String major;
 
     /** 班级 */
+    @TableField("stu_class")
     private String stuClass;
 
     /** 年龄 */

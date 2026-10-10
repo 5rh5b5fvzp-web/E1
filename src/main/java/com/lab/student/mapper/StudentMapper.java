@@ -1,5 +1,6 @@
 package com.lab.student.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lab.student.entity.Student;
 import org.apache.ibatis.annotations.Param;
 
@@ -7,10 +8,10 @@ import java.util.List;
 
 /**
  * 学生持久层接口。
- * 任务 2：基础 CRUD；任务 3：新增动态 SQL、多条件查询与批量操作；
- * 任务 4 阶段将继承 BaseMapper 获得 MyBatis-Plus 通用能力。
+ * - 任务 2/3：手写自定义方法 + XML 动态 SQL（见 StudentMapper.xml）；
+ * - 任务 4：继承 BaseMapper 获得零 SQL 通用 CRUD 与分页（XML 方法与通用方法共存）。
  */
-public interface StudentMapper {
+public interface StudentMapper extends BaseMapper<Student> {
 
     /** 查询全部学生 */
     List<Student> findAll();

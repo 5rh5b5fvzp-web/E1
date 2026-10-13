@@ -42,4 +42,10 @@ public interface StudentMapper extends BaseMapper<Student> {
 
     /** 分支选择：优先按姓名精确查，否则按专业查，否则查全部（choose/when/otherwise） */
     List<Student> queryByPriority(@Param("name") String name, @Param("major") String major);
+
+    /** 多表联合查询：查询学生及其所属班级信息（student JOIN class，回填班主任/教室） */
+    List<Student> findWithClass();
+
+    /** 多表联合查询 + 动态条件：按姓名/专业/班级名称筛选（LEFT JOIN + where 动态 SQL） */
+    List<Student> findWithClassByCondition(Student student);
 }

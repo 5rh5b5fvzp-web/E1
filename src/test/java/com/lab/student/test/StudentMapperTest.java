@@ -163,4 +163,36 @@ public class StudentMapperTest {
             Assert.assertTrue(byMajor.size() > 0);
         }
     }
+
+    // ---- 多表联合查询（student JOIN class）----
+
+    @Test
+    public void testFindWithClass() {
+        try (SqlSession session = MybatisUtil.openSession()) {
+            List<Student> list = session.getMapper(StudentMapper.class).findWithClass();
+            list.forEach(System.out::println);
+            Assert.assertTrue(list.size() >= 5);
+            // 张小明（学号 2024010201）应回填其班级的班主任与教室
+            Student zhang = list.stream()
+                    .filter(s -> "2024010201".equals(s.getStudentNo()))
+                    .findFirst().orElse(null);
+            Assert.assertNotNull(zhang);
+            Assert.assertEquals("张老师", zhang.getTeacherName());
+            Assert.assertEquals("教A201", zhang.getClassRoom());
+        }
+    }
+
+    @Test
+    public void testFindWithClassByCondition() {
+        try (SqlSession session = MybatisUtil.openSession()) {
+            StudentMapper mapper = session.getMapper(StudentMapper.class);
+            Student cond = new Student();
+            cond.setStuClass("软工2401");   // 按班级名称筛选
+            List<Student> list = mapper.findWithClassByCondition(cond);
+            list.forEach(System.out::println);
+            // 软工2401 有张小明、王大力两名学生
+            Assert.assertEquals(2, list.size());
+            Assert.assertEquals("张老师", list.get(0).getTeacherName());
+        }
+    }
 }

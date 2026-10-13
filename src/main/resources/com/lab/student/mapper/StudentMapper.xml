@@ -13,15 +13,22 @@
         <result property="gender"    column="gender"/>
         <result property="major"     column="major"/>
         <result property="stuClass"  column="stu_class"/>
+        <result property="classId"   column="class_id"/>
         <result property="age"       column="age"/>
         <result property="score"     column="score"/>
         <result property="enrollDate" column="enroll_date"/>
         <result property="status"    column="status"/>
     </resultMap>
 
+    <!-- 多表联查结果映射：继承 studentMap，并补充来自 class 表的关联字段 -->
+    <resultMap id="studentClassMap" type="com.lab.student.entity.Student" extends="studentMap">
+        <result property="teacherName" column="teacher_name"/>
+        <result property="classRoom"   column="class_room"/>
+    </resultMap>
+
     <!-- 全字段 SQL 片段，供各处复用 -->
     <sql id="allColumns">
-        student_id, student_no, name, gender, major, stu_class, age, score, enroll_date, status
+        student_id, student_no, name, gender, major, stu_class, class_id, age, score, enroll_date, status
     </sql>
 
     <!-- 查询全部 -->
@@ -37,16 +44,16 @@
     <!-- 新增并回填自增主键 -->
     <insert id="addStudent" parameterType="com.lab.student.entity.Student"
             useGeneratedKeys="true" keyProperty="studentId">
-        INSERT INTO student (student_no, name, gender, major, stu_class, age, score, enroll_date, status)
-        VALUES (#{studentNo}, #{name}, #{gender}, #{major}, #{stuClass}, #{age}, #{score}, #{enrollDate}, #{status})
+        INSERT INTO student (student_no, name, gender, major, stu_class, class_id, age, score, enroll_date, status)
+        VALUES (#{studentNo}, #{name}, #{gender}, #{major}, #{stuClass}, #{classId}, #{age}, #{score}, #{enrollDate}, #{status})
     </insert>
 
     <!-- 按主键全字段更新 -->
     <update id="modifyStudent" parameterType="com.lab.student.entity.Student">
         UPDATE student
         SET student_no = #{studentNo}, name = #{name}, gender = #{gender},
-            major = #{major}, stu_class = #{stuClass}, age = #{age},
-            score = #{score}, status = #{status}
+            major = #{major}, stu_class = #{stuClass}, class_id = #{classId},
+            age = #{age}, score = #{score}, status = #{status}
         WHERE student_id = #{studentId}
     </update>
 
@@ -106,9 +113,9 @@
 
     <!-- 批量插入 -->
     <insert id="addBatch">
-        INSERT INTO student (student_no, name, gender, major, stu_class, age, score, enroll_date, status) VALUES
+        INSERT INTO student (student_no, name, gender, major, stu_class, class_id, age, score, enroll_date, status) VALUES
         <foreach collection="list" item="s" separator=",">
-            (#{s.studentNo}, #{s.name}, #{s.gender}, #{s.major}, #{s.stuClass},
+            (#{s.studentNo}, #{s.name}, #{s.gender}, #{s.major}, #{s.stuClass}, #{s.classId},
              #{s.age}, #{s.score}, #{s.enrollDate}, #{s.status})
         </foreach>
     </insert>
@@ -127,6 +134,38 @@
                 WHERE status = 1
             </otherwise>
         </choose>
+    </select>
+
+    <!-- 多表联合查询：学生信息 LEFT JOIN 班级信息，回填班主任/教室 -->
+    <select id="findWithClass" resultMap="studentClassMap">
+        SELECT s.student_id, s.student_no, s.name, s.gender, s.major, s.stu_class, s.class_id,
+               s.age, s.score, s.enroll_date, s.status,
+               c.teacher_name, c.class_room
+        FROM student s
+        LEFT JOIN class c ON s.class_id = c.class_id
+    </select>
+
+    <!-- 多表联合查询 + 动态条件：按姓名模糊/专业/班级名称筛选 -->
+    <select id="findWithClassByCondition" parameterType="com.lab.student.entity.Student" resultMap="studentClassMap">
+        SELECT s.student_id, s.student_no, s.name, s.gender, s.major, s.stu_class, s.class_id,
+               s.age, s.score, s.enroll_date, s.status,
+               c.teacher_name, c.class_room
+        FROM student s
+        LEFT JOIN class c ON s.class_id = c.class_id
+        <where>
+            <if test="name != null and name != ''">
+                AND s.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="major != null and major != ''">
+                AND s.major = #{major}
+            </if>
+            <if test="stuClass != null and stuClass != ''">
+                AND s.stu_class = #{stuClass}
+            </if>
+            <if test="status != null">
+                AND s.status = #{status}
+            </if>
+        </where>
     </select>
 
 </mapper>

@@ -38,6 +38,18 @@ public class Student {
     @TableField("stu_class")
     private String stuClass;
 
+    /** 所属班级ID（外键关联 class 表） */
+    @TableField("class_id")
+    private Integer classId;
+
+    /** 班主任（来自 class 表，仅多表联查时回填，非 student 表字段） */
+    @TableField(exist = false)
+    private String teacherName;
+
+    /** 教室（来自 class 表，仅多表联查时回填，非 student 表字段） */
+    @TableField(exist = false)
+    private String classRoom;
+
     /** 年龄 */
     private Integer age;
 
@@ -68,6 +80,15 @@ public class Student {
     public String getStuClass() { return stuClass; }
     public void setStuClass(String stuClass) { this.stuClass = stuClass; }
 
+    public Integer getClassId() { return classId; }
+    public void setClassId(Integer classId) { this.classId = classId; }
+
+    public String getTeacherName() { return teacherName; }
+    public void setTeacherName(String teacherName) { this.teacherName = teacherName; }
+
+    public String getClassRoom() { return classRoom; }
+    public void setClassRoom(String classRoom) { this.classRoom = classRoom; }
+
     public Integer getAge() { return age; }
     public void setAge(Integer age) { this.age = age; }
 
@@ -88,6 +109,9 @@ public class Student {
                 + ", gender='" + gender + '\''
                 + ", major='" + major + '\''
                 + ", stuClass='" + stuClass + '\''
+                + ", classId=" + classId
+                + ", teacherName='" + teacherName + '\''
+                + ", classRoom='" + classRoom + '\''
                 + ", age=" + age
                 + ", score=" + score
                 + ", enrollDate=" + enrollDate

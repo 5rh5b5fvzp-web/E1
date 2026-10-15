@@ -195,4 +195,37 @@ public class StudentMapperTest {
             Assert.assertEquals("张老师", list.get(0).getTeacherName());
         }
     }
+
+    // ---- 高级查询：一对多 collection 联查与多对多统计 ----
+
+    @Test
+    public void testFindStudentWithCourses() {
+        try (SqlSession session = MybatisUtil.openSession()) {
+            List<Student> list = session.getMapper(StudentMapper.class).findStudentWithCourses();
+            list.forEach(System.out::println);
+            Assert.assertTrue(list.size() >= 5);
+            // 张小明（学号 2024010201）应带出 3 门课程
+            Student zhang = list.stream()
+                    .filter(s -> "2024010201".equals(s.getStudentNo()))
+                    .findFirst().orElse(null);
+            Assert.assertNotNull(zhang);
+            Assert.assertNotNull(zhang.getCourseList());
+            Assert.assertEquals(3, zhang.getCourseList().size());
+            Assert.assertEquals("Java程序设计", zhang.getCourseList().get(0).getCourseName());
+        }
+    }
+
+    @Test
+    public void testCountCourseEnrollment() {
+        try (SqlSession session = MybatisUtil.openSession()) {
+            List<java.util.Map<String, Object>> rows =
+                    session.getMapper(StudentMapper.class).countCourseEnrollment();
+            rows.forEach(System.out::println);
+            // 5 门课程都应返回统计行
+            Assert.assertEquals(5, rows.size());
+            // 第一门课 Java程序设计 应有 3 人选课（张小明、王大力、赵小雪）
+            Object first = rows.get(0).values().iterator().next();
+            Assert.assertNotNull(first);
+        }
+    }
 }

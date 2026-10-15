@@ -26,6 +26,16 @@
         <result property="classRoom"   column="class_room"/>
     </resultMap>
 
+    <!-- 高级联查结果映射：在班级信息基础上，通过 collection 一对多回填所选课程列表 -->
+    <resultMap id="studentCourseMap" type="com.lab.student.entity.Student" extends="studentClassMap">
+        <collection property="courseList" ofType="com.lab.student.entity.Course">
+            <id     property="courseId"      column="course_id"/>
+            <result property="courseName"    column="course_name"/>
+            <result property="credit"        column="credit"/>
+            <result property="courseTeacher" column="course_teacher"/>
+        </collection>
+    </resultMap>
+
     <!-- 全字段 SQL 片段，供各处复用 -->
     <sql id="allColumns">
         student_id, student_no, name, gender, major, stu_class, class_id, age, score, enroll_date, status
@@ -166,6 +176,29 @@
                 AND s.status = #{status}
             </if>
         </where>
+    </select>
+
+    <!-- 高级联查：学生 LEFT JOIN 班级 + 选课表 + 课程表，一对多回填所选课程列表（四表联查） -->
+    <select id="findStudentWithCourses" resultMap="studentCourseMap">
+        SELECT s.student_id, s.student_no, s.name, s.gender, s.major, s.stu_class, s.class_id,
+               s.age, s.score, s.enroll_date, s.status,
+               c.teacher_name, c.class_room,
+               co.course_id, co.course_name, co.credit, co.course_teacher
+        FROM student s
+        LEFT JOIN class c ON s.class_id = c.class_id
+        LEFT JOIN stu_course sc ON s.student_id = sc.student_id
+        LEFT JOIN course co ON sc.course_id = co.course_id
+        ORDER BY s.student_id
+    </select>
+
+    <!-- 统计：每门课程的选课人数（课程 LEFT JOIN 选课表后分组统计） -->
+    <select id="countCourseEnrollment" resultType="java.util.Map">
+        SELECT co.course_id AS courseId, co.course_name AS courseName,
+               COUNT(sc.student_id) AS enrollCount
+        FROM course co
+        LEFT JOIN stu_course sc ON co.course_id = sc.course_id
+        GROUP BY co.course_id, co.course_name
+        ORDER BY co.course_id
     </select>
 
 </mapper>

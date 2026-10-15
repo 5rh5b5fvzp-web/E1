@@ -50,6 +50,10 @@ public class Student {
     @TableField(exist = false)
     private String classRoom;
 
+    /** 所选课程列表（通过选课表 stu_course 与 course 表多对多，仅联查时回填） */
+    @TableField(exist = false)
+    private java.util.List<Course> courseList;
+
     /** 年龄 */
     private Integer age;
 
@@ -88,6 +92,9 @@ public class Student {
 
     public String getClassRoom() { return classRoom; }
     public void setClassRoom(String classRoom) { this.classRoom = classRoom; }
+
+    public java.util.List<Course> getCourseList() { return courseList; }
+    public void setCourseList(java.util.List<Course> courseList) { this.courseList = courseList; }
 
     public Integer getAge() { return age; }
     public void setAge(Integer age) { this.age = age; }

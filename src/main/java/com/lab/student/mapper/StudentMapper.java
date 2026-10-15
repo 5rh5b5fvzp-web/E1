@@ -48,4 +48,10 @@ public interface StudentMapper extends BaseMapper<Student> {
 
     /** 多表联合查询 + 动态条件：按姓名/专业/班级名称筛选（LEFT JOIN + where 动态 SQL） */
     List<Student> findWithClassByCondition(Student student);
+
+    /** 高级联查：学生带班级信息与所选课程列表（student+class+stu_course+course，一对多 collection） */
+    List<Student> findStudentWithCourses();
+
+    /** 统计：每门课程的选课人数（多对多分组统计） */
+    java.util.List<java.util.Map<String, Object>> countCourseEnrollment();
 }
